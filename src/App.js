@@ -62,7 +62,7 @@ function App() {
               </NavDropdown>}
               {user && user.token && <Nav.Link onClick={logout}>Logout</Nav.Link>}
               {!user && <Nav.Link as={Link} to="/login">Login</Nav.Link>}
-            </Nav>}
+            </Nav>
           </Navbar.Collapse>
         </Navbar>
         <Container>
