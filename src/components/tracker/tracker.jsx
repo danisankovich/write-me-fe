@@ -52,7 +52,9 @@ export default function Tracker(props) {
             setTitle(e.target.value);
         }
         if (type === 'date') {
-            setDate(e.target.value);
+            const [year, month, day] = e.target.value.split('-');
+            const newDate = `${month}/${day}/${year}`;
+            setDate(newDate);
         }
         if (type === 'wordCount') {
             setWordCount(e.target.value);
@@ -72,15 +74,22 @@ export default function Tracker(props) {
     function addProgress(e) {
         e.preventDefault();
 
-        trackers[currentTrackerIndex].sets.push({date, wordCount});
+        const foundIndex = trackers[currentTrackerIndex].sets.findIndex(set => set.date === date);
+        if (foundIndex > -1) {
+            trackers[currentTrackerIndex].sets[foundIndex] = {date, wordCount};
+        } else {
+            trackers[currentTrackerIndex].sets.push({date, wordCount});
+        }
+        trackers[currentTrackerIndex].sets.sort((a, b) => {
+            return a.date > b.date ? 1 : -1;
+        })
         setTrackers(trackers);
         setNewTrackerSetForm(false);
-        // add in, but doesn't save. After using this function as many times as needed, use saveProgress
-        // make it so same date overwrites. And the dates aren't pushed. They are inserted into proper place
     }
 
-    function removeProgress(date, words) {
-        
+    function removeProgress(i) {
+        trackers[currentTrackerIndex].sets.splice(i, 1);
+        setTrackers([...trackers]);
     }
 
     function saveProgress() {
@@ -96,8 +105,8 @@ export default function Tracker(props) {
         });
     }
 
-    function changeCurrentTrackerIndex(i) {
-        setCurrentTrackerIndex(i);
+    function changeCurrentTrackerIndex(e) {
+        setCurrentTrackerIndex(e.target.value);
     }
 
     function toggleNewTrackerSetForm() {
@@ -111,11 +120,17 @@ export default function Tracker(props) {
 
                 {!showNewForm && <Button onClick={toggleNewForm}>Create New Tracker</Button>}
                 {newTrackerForm()}
-                {trackers && trackers.map((tracker, i) => {
-                    return (
-                        <div key={i} onClick={() => changeCurrentTrackerIndex(i)}>{tracker.title}</div>
-                    )
-                })}
+                <Form.Group controlId="exampleForm.ControlSelect1">
+                    <Form.Label>Tracker</Form.Label>
+                    <Form.Control as="select" value={currentTrackerIndex} onChange={(e) => changeCurrentTrackerIndex(e)}>
+                        {trackers && trackers.map((tracker, i) => {
+                            return (
+                                <option key={i} value={i}>{tracker.title}</option>
+                            )
+                        })}
+                    </Form.Control>
+                </Form.Group>
+
                 {trackers.length && <div>
                     <h4>{trackers[currentTrackerIndex].title}</h4>
                     <Table striped bordered hover>
@@ -123,12 +138,14 @@ export default function Tracker(props) {
                             <tr>
                                 <th>Date</th>
                                 <th>Words Written</th>
+                                <th>Remove</th>
                             </tr>
                         </thead>
                         <tbody>
                             {trackers[currentTrackerIndex].sets.map((set, i) => (<tr key={i}>
                                 <td>{set.date}</td>
                                 <td>{set.wordCount}</td>
+                                <td><div className="removeItem" onClick={() => removeProgress(i)}><span>X</span></div></td>
                             </tr>))}
                         </tbody>
                     </Table>
@@ -137,8 +154,8 @@ export default function Tracker(props) {
                         <Button variant='success' onClick={saveProgress}>Save Changes</Button>
                     </div>}
                     {newTrackerSetForm && <Form onSubmit={addProgress}>
-                        <Form.Control placeholder="Date" onChange={(e) => handleChange('date', e)}></Form.Control>    
-                        <Form.Control placeholder="Word Count" onChange={(e) => handleChange('wordCount', e)}></Form.Control>    
+                        <Form.Control placeholder="Date" type="date" onChange={(e) => handleChange('date', e)}></Form.Control>    
+                        <Form.Control placeholder="Word Count" type="number" onChange={(e) => handleChange('wordCount', e)}></Form.Control>    
                         <Button type="submit">Add Progress</Button>
                     </Form>}
                 </div>}

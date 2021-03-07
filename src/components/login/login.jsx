@@ -45,18 +45,24 @@ export default function Login(props) {
         }
     }
 
-    function handleEmail(e) {
-        setEmail(e.target.value);
-    }
-    
-    function handleUsername(e) {
-        setUsername(e.target.value);
-    }
-    function handlePassword(e) {
-        setPassword(e.target.value);
+    function handleInput(e, type) {
+        switch(type) {
+            case('EMAIL'):
+                setEmail(e.target.value);
+                break;
+            case('USERNAME'):
+                setUsername(e.target.value);
+                break;
+            case('PASSWORD'):
+                setPassword(e.target.value);
+                break;
+            default:
+                break;
+        }
     }
 
-    function swapAuth() {
+    function swapAuth(e) {
+        e.preventDefault();
         const newCurrentType = currentType === 'LOGIN' ? 'SIGNUP' : 'LOGIN';
         setCurrentType(newCurrentType)
     }
@@ -64,11 +70,11 @@ export default function Login(props) {
     return (
         <Row>
             <Form onSubmit={handleSubmit}>
-                <Form.Control type="text" placeholder="email" onChange={handleEmail}></Form.Control>
-                {currentType === 'SIGNUP' && <Form.Control type="text" placeholder="username" onChange={handleUsername}></Form.Control> }
-                <Form.Control type="password" placeholder="password" onChange={handlePassword}></Form.Control>
+                <Form.Control type="text" placeholder="email" onChange={(e) => handleInput(e, 'EMAIL')}></Form.Control>
+                {currentType === 'SIGNUP' && <Form.Control type="text" placeholder="username" onChange={(e) => handleInput(e, 'USERNAME')}></Form.Control> }
+                <Form.Control type="password" placeholder="password" onChange={(e) => handleInput(e, 'PASSWORD')}></Form.Control>
                 <Button type="submit">{currentType}</Button>
-                <div>Need an account? Click <a className="link-button" onClick={swapAuth}>here</a></div>
+                <div>Need an account? Click <a href="/" className="link-button" onClick={(e) => swapAuth(e)}>here</a></div>
             </Form>
         </Row>
     )

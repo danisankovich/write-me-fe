@@ -1,0 +1,13 @@
+.removeItem {
+    border: 1px solid red;
+    color: red;
+    border-radius: 20px;
+    width: 24px;
+    height: 24px;
+    background-color: white;
+    cursor: pointer;
+    span {
+        padding-left: 6px;
+        padding-bottom: 2px;
+    }
+}
