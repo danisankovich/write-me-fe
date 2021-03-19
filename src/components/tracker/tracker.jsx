@@ -7,14 +7,28 @@ export default function Tracker(props) {
     const [ trackers, setTrackers ] = useState([]);
     const [ newTrackerSetForm, setNewTrackerSetForm ] = useState(false);
     const [ currentTrackerIndex, setCurrentTrackerIndex ] = useState(0);
+    const [ currentTracker, setCurrentTracker ] = useState(null);
     const [ title, setTitle ] = useState('');
     const [ date, setDate ] = useState('');
     const [ wordCount, setWordCount ] = useState(0);
+    const [ totalWordCount, setTotalWordCount ] = useState(0);
     const { user } = props;
 
     useEffect(() => {
         fetchTrackers();
     }, [props.user]);
+
+    
+    useEffect(() => {
+        setCurrentTracker(trackers[currentTrackerIndex]);
+        if (currentTracker && currentTracker.sets.length > 1) {
+            setTotalWordCount(currentTracker.sets.reduce((a, b) =>  a.wordCount + b.wordCount));
+        } else if (currentTracker && currentTracker.sets.length === 1) {
+            setTotalWordCount(currentTracker.sets[0].wordCount);
+        } else {
+            setTotalWordCount(0);
+        }
+    }, [currentTrackerIndex, trackers, currentTracker]);
 
     function fetchTrackers() {
         fetch('http://localhost:3001/api/users/tracker', {
@@ -57,7 +71,7 @@ export default function Tracker(props) {
             setDate(newDate);
         }
         if (type === 'wordCount') {
-            setWordCount(e.target.value);
+            setWordCount(parseInt(e.target.value));
         }
     }
 
@@ -74,21 +88,22 @@ export default function Tracker(props) {
     function addProgress(e) {
         e.preventDefault();
 
-        const foundIndex = trackers[currentTrackerIndex].sets.findIndex(set => set.date === date);
+        const foundIndex = currentTracker.sets.findIndex(set => set.date === date);
         if (foundIndex > -1) {
-            trackers[currentTrackerIndex].sets[foundIndex] = {date, wordCount};
+            currentTracker.sets[foundIndex] = {date, wordCount};
         } else {
-            trackers[currentTrackerIndex].sets.push({date, wordCount});
+            currentTracker.sets.push({date, wordCount});
         }
-        trackers[currentTrackerIndex].sets.sort((a, b) => {
+        currentTracker.sets.sort((a, b) => {
             return a.date > b.date ? 1 : -1;
         })
         setTrackers(trackers);
         setNewTrackerSetForm(false);
+        setTotalWordCount(totalWordCount + wordCount);
     }
 
     function removeProgress(i) {
-        trackers[currentTrackerIndex].sets.splice(i, 1);
+        currentTracker.sets.splice(i, 1);
         setTrackers([...trackers]);
     }
 
@@ -131,8 +146,8 @@ export default function Tracker(props) {
                     </Form.Control>
                 </Form.Group>
 
-                {trackers.length && <div>
-                    <h4>{trackers[currentTrackerIndex].title}</h4>
+                {!!currentTracker && <div>
+                    <h4>{currentTracker.title}: {totalWordCount} Words</h4>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
@@ -142,7 +157,7 @@ export default function Tracker(props) {
                             </tr>
                         </thead>
                         <tbody>
-                            {trackers[currentTrackerIndex].sets.map((set, i) => (<tr key={i}>
+                            {currentTracker.sets.map((set, i) => (<tr key={i}>
                                 <td>{set.date}</td>
                                 <td>{set.wordCount}</td>
                                 <td><div className="removeItem" onClick={() => removeProgress(i)}><span>X</span></div></td>

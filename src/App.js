@@ -3,6 +3,7 @@ import Tracker from './components/tracker/tracker.jsx';
 import Login from './components/login/login.jsx';
 import Button from './components/button/button.jsx';
 import BookSearch from './components/bookSearch/bookSearch.jsx';
+import Book from './components/book/book.jsx';
 import {
   BrowserRouter as Router,
   Switch,
@@ -78,6 +79,9 @@ function App() {
               </Route>
               <Route path="/book-search">
                 <BookSearch></BookSearch>
+              </Route>
+              <Route path="/book/:id">
+                <Book></Book>
               </Route>
             </Switch>
         </Container>
